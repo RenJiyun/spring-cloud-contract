@@ -18,43 +18,45 @@ package org.springframework.cloud.contract.verifier.builder;
 
 class ClassAnnotationsBuilder {
 
-	private final GeneratedTestClassBuilder parentBuilder;
+    // 父节点、出口
+    private final GeneratedTestClassBuilder parentBuilder;
 
-	private final BlockBuilder builder;
+    private final BlockBuilder builder;
 
-	private final GeneratedClassMetaData metaData;
+    private final GeneratedClassMetaData metaData;
 
-	ClassAnnotationsBuilder(GeneratedTestClassBuilder generatedTestClassBuilder) {
-		this.parentBuilder = generatedTestClassBuilder;
-		this.builder = generatedTestClassBuilder.blockBuilder;
-		this.metaData = generatedTestClassBuilder.generatedClassMetaData;
-	}
+    ClassAnnotationsBuilder(GeneratedTestClassBuilder generatedTestClassBuilder) {
+        this.parentBuilder = generatedTestClassBuilder;
+        this.builder = generatedTestClassBuilder.blockBuilder;
+        this.metaData = generatedTestClassBuilder.generatedClassMetaData;
+    }
 
-	ClassAnnotationsBuilder defaultAnnotations() {
-		this.parentBuilder.classAnnotations(new SuppressWarningsClassAnnotation(builder));
-		return this;
-	}
+    ClassAnnotationsBuilder defaultAnnotations() {
+        this.parentBuilder.classAnnotations(new SuppressWarningsClassAnnotation(builder));
+        return this;
+    }
 
-	ClassAnnotationsBuilder jUnit4() {
-		this.parentBuilder
-				.classAnnotations(new JUnit4OrderClassAnnotation(builder, metaData));
-		return this;
-	}
+    ClassAnnotationsBuilder jUnit4() {
+        this.parentBuilder
+                .classAnnotations(new JUnit4OrderClassAnnotation(builder, metaData));
+        return this;
+    }
 
-	ClassAnnotationsBuilder jUnit5() {
-		this.parentBuilder
-				.classAnnotations(new JUnit5OrderClassAnnotation(builder, metaData));
-		return this;
-	}
+    ClassAnnotationsBuilder jUnit5() {
+        this.parentBuilder
+                .classAnnotations(new JUnit5OrderClassAnnotation(builder, metaData));
+        return this;
+    }
 
-	ClassAnnotationsBuilder spock() {
-		this.parentBuilder
-				.classAnnotations(new SpockOrderClassAnnotation(builder, metaData));
-		return this;
-	}
+    ClassAnnotationsBuilder spock() {
+        this.parentBuilder
+                .classAnnotations(new SpockOrderClassAnnotation(builder, metaData));
+        return this;
+    }
 
-	GeneratedTestClassBuilder build() {
-		return this.parentBuilder;
-	}
+    // 回到父节点、上一级
+    GeneratedTestClassBuilder build() {
+        return this.parentBuilder;
+    }
 
 }

@@ -16,20 +16,25 @@
 
 package org.springframework.cloud.contract.verifier.builder;
 
+/**
+ * 源代码文件相关的元数据
+ */
 interface ClassMetaData extends Acceptor {
 
-	ClassMetaData setupLineEnding();
+    // 结尾字符
+    ClassMetaData setupLineEnding();
 
-	ClassMetaData setupLabelPrefix();
+    // 注释字符
+    ClassMetaData setupLabelPrefix();
 
-	ClassMetaData packageDefinition();
+    ClassMetaData packageDefinition();
 
-	ClassMetaData modifier();
+    ClassMetaData modifier();
 
-	ClassMetaData suffix();
+    ClassMetaData suffix();
 
-	ClassMetaData parentClass();
+    ClassMetaData parentClass();
 
-	ClassMetaData className();
+    ClassMetaData className();
 
 }

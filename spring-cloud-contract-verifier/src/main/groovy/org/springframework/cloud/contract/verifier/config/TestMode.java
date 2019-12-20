@@ -20,26 +20,30 @@ package org.springframework.cloud.contract.verifier.config;
  * Provides different testing modes.
  *
  * @author Jakub Kubrynski, codearte.io
- *
  * @since 1.0.0
  */
 public enum TestMode {
 
-	/**
-	 * Uses Spring's MockMvc mode.
-	 */
-	MOCKMVC,
-	/**
-	 * Uses direct HTTP invocations with Rest Assured.
-	 */
-	EXPLICIT,
-	/**
-	 * Uses JAX-RS client.
-	 */
-	JAXRSCLIENT,
-	/**
-	 * Uses Spring's reactive WebTestClient.
-	 */
-	WEBTESTCLIENT
+    /**
+     * Uses Spring's MockMvc mode.
+     */
+    MOCKMVC,
+    /**
+     * Uses direct HTTP invocations with Rest Assured.
+     */
+    EXPLICIT,
+    /**
+     * Uses JAX-RS client.
+     */
+    JAXRSCLIENT,
+    /**
+     * Uses Spring's reactive WebTestClient.
+     */
+    WEBTESTCLIENT,
+
+    /**
+     * 暂时先加这样一个类型，所有的rpc应该都差不多
+     */
+    DUBBO
 
 }

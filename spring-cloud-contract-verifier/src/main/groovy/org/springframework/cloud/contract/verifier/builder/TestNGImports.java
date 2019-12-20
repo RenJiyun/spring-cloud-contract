@@ -16,35 +16,35 @@
 
 package org.springframework.cloud.contract.verifier.builder;
 
-import java.util.Arrays;
-
 import org.springframework.cloud.contract.verifier.config.TestFramework;
+
+import java.util.Arrays;
 
 class TestNGImports implements Imports {
 
-	private final BlockBuilder blockBuilder;
+    private final BlockBuilder blockBuilder;
 
-	private final GeneratedClassMetaData generatedClassMetaData;
+    private final GeneratedClassMetaData generatedClassMetaData;
 
-	private static final String[] IMPORTS = { "org.testng.annotations.Test" };
+    private static final String[] IMPORTS = {"org.testng.annotations.Test"};
 
-	TestNGImports(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		this.blockBuilder = blockBuilder;
-		this.generatedClassMetaData = generatedClassMetaData;
-	}
+    TestNGImports(BlockBuilder blockBuilder,
+                  GeneratedClassMetaData generatedClassMetaData) {
+        this.blockBuilder = blockBuilder;
+        this.generatedClassMetaData = generatedClassMetaData;
+    }
 
-	@Override
-	public Imports call() {
-		Arrays.stream(IMPORTS)
-				.forEach(s -> this.blockBuilder.addLineWithEnding("import " + s));
-		return this;
-	}
+    @Override
+    public Imports call() {
+        Arrays.stream(IMPORTS)
+                .forEach(s -> this.blockBuilder.addLineWithEnding("import " + s));
+        return this;
+    }
 
-	@Override
-	public boolean accept() {
-		return this.generatedClassMetaData.configProperties
-				.getTestFramework() == TestFramework.TESTNG;
-	}
+    @Override
+    public boolean accept() {
+        return this.generatedClassMetaData.configProperties
+                .getTestFramework() == TestFramework.TESTNG;
+    }
 
 }

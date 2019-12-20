@@ -20,23 +20,23 @@ import java.util.Arrays;
 
 class SuppressWarningsClassAnnotation implements ClassAnnotation {
 
-	private final BlockBuilder blockBuilder;
+    private final BlockBuilder blockBuilder;
 
-	private static final String[] ANNOTATIONS = { "@SuppressWarnings(\"rawtypes\")" };
+    private static final String[] ANNOTATIONS = {"@SuppressWarnings(\"rawtypes\")"};
 
-	SuppressWarningsClassAnnotation(BlockBuilder blockBuilder) {
-		this.blockBuilder = blockBuilder;
-	}
+    SuppressWarningsClassAnnotation(BlockBuilder blockBuilder) {
+        this.blockBuilder = blockBuilder;
+    }
 
-	@Override
-	public ClassAnnotation call() {
-		Arrays.stream(ANNOTATIONS).forEach(this.blockBuilder::addLine);
-		return this;
-	}
+    @Override
+    public ClassAnnotation call() {
+        Arrays.stream(ANNOTATIONS).forEach(this.blockBuilder::addLine);
+        return this;
+    }
 
-	@Override
-	public boolean accept() {
-		return true;
-	}
+    @Override
+    public boolean accept() {
+        return true;
+    }
 
 }

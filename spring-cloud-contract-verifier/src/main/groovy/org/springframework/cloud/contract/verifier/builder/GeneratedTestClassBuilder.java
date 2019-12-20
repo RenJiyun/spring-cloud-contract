@@ -31,154 +31,159 @@ import java.util.stream.Collectors;
  */
 class GeneratedTestClassBuilder {
 
-	private List<ClassMetaData> metaData = new LinkedList<>();
+    private List<ClassMetaData> metaData = new LinkedList<>();
 
-	private List<Imports> imports = new LinkedList<>();
+    // 收集需要导入的依赖包
+    private List<Imports> imports = new LinkedList<>();
 
-	private List<Imports> staticImports = new LinkedList<>();
+    private List<Imports> staticImports = new LinkedList<>();
 
-	private List<ClassAnnotation> annotations = new LinkedList<>();
+    private List<ClassAnnotation> annotations = new LinkedList<>();
 
-	private ClassBodyBuilder classBodyBuilder;
+    private ClassBodyBuilder classBodyBuilder;
 
-	final BlockBuilder blockBuilder;
+    final BlockBuilder blockBuilder;
 
-	final GeneratedClassMetaData generatedClassMetaData;
+    final GeneratedClassMetaData generatedClassMetaData;
 
-	private GeneratedTestClassBuilder(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		this.blockBuilder = blockBuilder;
-		this.generatedClassMetaData = generatedClassMetaData;
-	}
+    private GeneratedTestClassBuilder(BlockBuilder blockBuilder,
+                                      GeneratedClassMetaData generatedClassMetaData) {
+        this.blockBuilder = blockBuilder;
+        this.generatedClassMetaData = generatedClassMetaData;
+    }
 
-	static GeneratedTestClassBuilder builder(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		return new GeneratedTestClassBuilder(blockBuilder, generatedClassMetaData);
-	}
+    static GeneratedTestClassBuilder builder(BlockBuilder blockBuilder,
+                                             GeneratedClassMetaData generatedClassMetaData) {
+        return new GeneratedTestClassBuilder(blockBuilder, generatedClassMetaData);
+    }
 
-	GeneratedTestClassBuilder metaData(ClassMetaData metaData) {
-		this.metaData.add(metaData);
-		return this;
-	}
+    GeneratedTestClassBuilder metaData(ClassMetaData metaData) {
+        this.metaData.add(metaData);
+        return this;
+    }
 
-	MetaDataBuilder metaData() {
-		return new MetaDataBuilder(this);
-	}
+    // 进入metadata设置
+    MetaDataBuilder metaData() {
+        return new MetaDataBuilder(this);
+    }
 
-	GeneratedTestClassBuilder metaData(ClassMetaData... metaData) {
-		return metaData(Arrays.asList(metaData));
-	}
+    GeneratedTestClassBuilder metaData(ClassMetaData... metaData) {
+        return metaData(Arrays.asList(metaData));
+    }
 
-	GeneratedTestClassBuilder metaData(List<ClassMetaData> metaData) {
-		this.metaData.addAll(metaData);
-		return this;
-	}
+    GeneratedTestClassBuilder metaData(List<ClassMetaData> metaData) {
+        this.metaData.addAll(metaData);
+        return this;
+    }
 
-	ImportsBuilder imports() {
-		return new ImportsBuilder(this);
-	}
+    // 进入import设置
+    ImportsBuilder imports() {
+        return new ImportsBuilder(this);
+    }
 
-	GeneratedTestClassBuilder imports(Imports imports) {
-		this.imports.add(imports);
-		return this;
-	}
+    GeneratedTestClassBuilder imports(Imports imports) {
+        this.imports.add(imports);
+        return this;
+    }
 
-	GeneratedTestClassBuilder imports(Imports... imports) {
-		return imports(Arrays.asList(imports));
-	}
+    GeneratedTestClassBuilder imports(Imports... imports) {
+        return imports(Arrays.asList(imports));
+    }
 
-	GeneratedTestClassBuilder imports(List<Imports> imports) {
-		this.imports.addAll(imports);
-		return this;
-	}
+    GeneratedTestClassBuilder imports(List<Imports> imports) {
+        this.imports.addAll(imports);
+        return this;
+    }
 
-	GeneratedTestClassBuilder staticImports(Imports imports) {
-		this.staticImports.add(imports);
-		return this;
-	}
+    GeneratedTestClassBuilder staticImports(Imports imports) {
+        this.staticImports.add(imports);
+        return this;
+    }
 
-	GeneratedTestClassBuilder staticImports(Imports... imports) {
-		return staticImports(Arrays.asList(imports));
-	}
+    GeneratedTestClassBuilder staticImports(Imports... imports) {
+        return staticImports(Arrays.asList(imports));
+    }
 
-	GeneratedTestClassBuilder staticImports(List<Imports> imports) {
-		this.staticImports.addAll(imports);
-		return this;
-	}
+    GeneratedTestClassBuilder staticImports(List<Imports> imports) {
+        this.staticImports.addAll(imports);
+        return this;
+    }
 
-	ClassAnnotationsBuilder classAnnotations() {
-		return new ClassAnnotationsBuilder(this);
-	}
+    // 进入类注解设置
+    ClassAnnotationsBuilder classAnnotations() {
+        return new ClassAnnotationsBuilder(this);
+    }
 
-	GeneratedTestClassBuilder classAnnotations(ClassAnnotation... annotations) {
-		List<ClassAnnotation> classAnnotations = Arrays.asList(annotations);
-		this.annotations.addAll(classAnnotations);
-		return this;
-	}
+    GeneratedTestClassBuilder classAnnotations(ClassAnnotation... annotations) {
+        List<ClassAnnotation> classAnnotations = Arrays.asList(annotations);
+        this.annotations.addAll(classAnnotations);
+        return this;
+    }
 
-	GeneratedTestClassBuilder classBodyBuilder(ClassBodyBuilder classBodyBuilder) {
-		this.classBodyBuilder = classBodyBuilder;
-		return this;
-	}
+    GeneratedTestClassBuilder classBodyBuilder(ClassBodyBuilder classBodyBuilder) {
+        this.classBodyBuilder = classBodyBuilder;
+        return this;
+    }
 
-	/**
-	 * From a matching {@link ClassMetaData} given the present input data, builds a
-	 * generated test class.
-	 * @return generated test class
-	 */
-	GeneratedTestClass build() {
-		// picks a matching class meta data
-		ClassMetaData classMetaData = this.metaData.stream().filter(Acceptor::accept)
-				.findFirst().orElseThrow(() -> new IllegalStateException(
-						"There is no matching class meta data"));
-		classMetaData.setupLineEnding().setupLabelPrefix()
-				// package com.example
-				.packageDefinition();
-		// \n
-		this.blockBuilder.addEmptyLine();
-		// import ... \n
-		visitSeparated(this.imports);
-		// import static ... \n
-		visitSeparated(this.staticImports);
-		// @Test ... \n
-		visitWithNoEnding(this.annotations);
-		// @formatter:off
-		// public
-		this.blockBuilder.append(classMetaData::modifier)
-				.addAtTheEndIfEndsWithAChar(" ")
-				// class
-				.append("class")
-				// Foo
-				.appendWithSpace(classMetaData::className)
-				// Spec
-				.append(classMetaData::suffix)
-				// extends Parent
-				.appendWithSpace(classMetaData::parentClass);
-		// public class FooSpec extends Parent
-		// @formatter:on
-		this.classBodyBuilder.build();
-		return new GeneratedTestClass(this.blockBuilder);
-	}
+    /**
+     * From a matching {@link ClassMetaData} given the present input data, builds a
+     * generated test class.
+     *
+     * @return generated test class
+     */
+    GeneratedTestClass build() {
+        // picks a matching class meta data
+        ClassMetaData classMetaData = this.metaData.stream().filter(Acceptor::accept)
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        "There is no matching class meta data"));
+        classMetaData.setupLineEnding().setupLabelPrefix()
+                // package com.example
+                .packageDefinition();
+        // \n
+        this.blockBuilder.addEmptyLine();
+        // import ... \n
+        visitSeparated(this.imports);
+        // import static ... \n
+        visitSeparated(this.staticImports);
+        // @Test ... \n
+        visitWithNoEnding(this.annotations);
+        // @formatter:off
+        // public
+        this.blockBuilder.append(classMetaData::modifier)
+                .addAtTheEndIfEndsWithAChar(" ")
+                // class
+                .append("class")
+                // Foo
+                .appendWithSpace(classMetaData::className)
+                // Spec
+                .append(classMetaData::suffix)
+                // extends Parent
+                .appendWithSpace(classMetaData::parentClass);
+        // public class FooSpec extends Parent
+        // @formatter:on
+        this.classBodyBuilder.build();
+        return new GeneratedTestClass(this.blockBuilder);
+    }
 
-	void visitSeparated(List<? extends Visitor> list) {
-		visit(list, true, true);
-	}
+    void visitSeparated(List<? extends Visitor> list) {
+        visit(list, true, true);
+    }
 
-	void visitWithNoEnding(List<? extends Visitor> list) {
-		visit(list, false, false);
-	}
+    void visitWithNoEnding(List<? extends Visitor> list) {
+        visit(list, false, false);
+    }
 
-	private void visit(List<? extends Visitor> list, boolean addEnding,
-			boolean separated) {
-		List<Visitor> elements = list.stream().filter(Acceptor::accept)
-				.collect(Collectors.toList());
-		elements.forEach(OurCallable::call);
-		if (addEnding) {
-			this.blockBuilder.addEndingIfNotPresent();
-		}
-		if (!elements.isEmpty() && separated) {
-			this.blockBuilder.addEmptyLine();
-		}
-	}
+    private void visit(List<? extends Visitor> list, boolean addEnding,
+                       boolean separated) {
+        List<Visitor> elements = list.stream().filter(Acceptor::accept)
+                .collect(Collectors.toList());
+        elements.forEach(OurCallable::call);
+        if (addEnding) {
+            this.blockBuilder.addEndingIfNotPresent();
+        }
+        if (!elements.isEmpty() && separated) {
+            this.blockBuilder.addEmptyLine();
+        }
+    }
 
 }

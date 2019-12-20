@@ -30,65 +30,67 @@ import java.util.stream.Collectors;
  */
 class ClassBodyBuilder {
 
-	private List<Field> fields = new LinkedList<>();
+    private List<Field> fields = new LinkedList<>();
 
-	private SingleMethodBuilder methodBuilder;
+    private SingleMethodBuilder methodBuilder;
 
-	final BlockBuilder blockBuilder;
+    final BlockBuilder blockBuilder;
 
-	final GeneratedClassMetaData generatedClassMetaData;
+    final GeneratedClassMetaData generatedClassMetaData;
 
-	private ClassBodyBuilder(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		this.blockBuilder = blockBuilder;
-		this.generatedClassMetaData = generatedClassMetaData;
-	}
+    private ClassBodyBuilder(BlockBuilder blockBuilder,
+                             GeneratedClassMetaData generatedClassMetaData) {
+        this.blockBuilder = blockBuilder;
+        this.generatedClassMetaData = generatedClassMetaData;
+    }
 
-	static ClassBodyBuilder builder(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		return new ClassBodyBuilder(blockBuilder, generatedClassMetaData);
-	}
+    static ClassBodyBuilder builder(BlockBuilder blockBuilder,
+                                    GeneratedClassMetaData generatedClassMetaData) {
+        return new ClassBodyBuilder(blockBuilder, generatedClassMetaData);
+    }
 
-	FieldBuilder field() {
-		return new FieldBuilder(this);
-	}
+    // 进入field设置
+    FieldBuilder field() {
+        return new FieldBuilder(this);
+    }
 
-	ClassBodyBuilder field(Field field) {
-		this.fields.add(field);
-		return this;
-	}
+    ClassBodyBuilder field(Field field) {
+        this.fields.add(field);
+        return this;
+    }
 
-	ClassBodyBuilder methodBuilder(SingleMethodBuilder methodBuilder) {
-		this.methodBuilder = methodBuilder;
-		return this;
-	}
+    ClassBodyBuilder methodBuilder(SingleMethodBuilder methodBuilder) {
+        this.methodBuilder = methodBuilder;
+        return this;
+    }
 
-	/**
-	 * Mutates the {@link BlockBuilder} to generate methods and fields.
-	 * @return block builder with contents of built methods
-	 */
-	BlockBuilder build() {
-		this.blockBuilder.inBraces(() -> {
-			// @Rule ...
-			visit(this.fields);
-			// new line if fields added
-			this.methodBuilder.build();
-		});
-		return this.blockBuilder;
-	}
+    /**
+     * Mutates the {@link BlockBuilder} to generate methods and fields.
+     *
+     * @return block builder with contents of built methods
+     */
+    BlockBuilder build() {
+        this.blockBuilder.inBraces(() -> {
+            // @Rule ...
+            visit(this.fields);
+            // new line if fields added
+            this.methodBuilder.build();
+        });
+        return this.blockBuilder;
+    }
 
-	void visit(List<? extends Visitor> list) {
-		List<? extends Visitor> visitors = list.stream().filter(Acceptor::accept)
-				.collect(Collectors.toList());
-		Iterator<? extends Visitor> iterator = visitors.iterator();
-		while (iterator.hasNext()) {
-			Visitor visitor = iterator.next();
-			visitor.call();
-			this.blockBuilder.addEndingIfNotPresent();
-			if (iterator.hasNext()) {
-				this.blockBuilder.addEmptyLine();
-			}
-		}
-	}
+    void visit(List<? extends Visitor> list) {
+        List<? extends Visitor> visitors = list.stream().filter(Acceptor::accept)
+                .collect(Collectors.toList());
+        Iterator<? extends Visitor> iterator = visitors.iterator();
+        while (iterator.hasNext()) {
+            Visitor visitor = iterator.next();
+            visitor.call();
+            this.blockBuilder.addEndingIfNotPresent();
+            if (iterator.hasNext()) {
+                this.blockBuilder.addEmptyLine();
+            }
+        }
+    }
 
 }

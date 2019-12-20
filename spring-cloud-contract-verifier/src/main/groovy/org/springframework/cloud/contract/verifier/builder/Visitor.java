@@ -16,6 +16,13 @@
 
 package org.springframework.cloud.contract.verifier.builder;
 
+/**
+ * 提供一个动作序列的抽象：
+ * 1. 测试是否可做
+ * 2. 做
+ *
+ * @param <T>
+ */
 interface Visitor<T> extends Acceptor, OurCallable<T> {
 
 }

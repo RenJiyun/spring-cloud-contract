@@ -43,155 +43,166 @@ import static org.springframework.cloud.contract.verifier.util.NamesUtil.beforeL
 import static org.springframework.cloud.contract.verifier.util.NamesUtil.convertIllegalPackageChars
 import static org.springframework.cloud.contract.verifier.util.NamesUtil.directoryToPackage
 import static org.springframework.cloud.contract.verifier.util.NamesUtil.toLastDot
+
 /**
  * @author Jakub Kubrynski, codearte.io
  */
 @CompileStatic
 class TestGenerator {
 
-	private static final String DEFAULT_CLASS_PREFIX = "ContractVerifier"
-	private static final String DEFAULT_TEST_PACKAGE = "org.springframework.cloud.contract.verifier.tests"
-	private static final Log log = LogFactory.getLog(TestGenerator)
+    private static final String DEFAULT_CLASS_PREFIX = "ContractVerifier"
+    private static final String DEFAULT_TEST_PACKAGE = "org.springframework.cloud.contract.verifier.tests"
+    private static final Log log = LogFactory.getLog(TestGenerator)
 
-	private final ContractVerifierConfigProperties configProperties
-	private AtomicInteger counter = new AtomicInteger()
-	private SingleTestGenerator generator
-	private FileSaver saver
-	private ContractFileScanner contractFileScanner
+    private final ContractVerifierConfigProperties configProperties
+    private AtomicInteger counter = new AtomicInteger()
+    private SingleTestGenerator generator
+    private FileSaver saver
+    private ContractFileScanner contractFileScanner
 
-	TestGenerator(ContractVerifierConfigProperties configProperties) {
-		this(configProperties, singleTestGenerator(),
-				new FileSaver(configProperties.generatedTestSourcesDir, configProperties.testFramework.classExtension,
-						singleTestGenerator()))
-	}
+    TestGenerator(ContractVerifierConfigProperties configProperties) {
+        this(configProperties, singleTestGenerator(),
+                new FileSaver(configProperties.generatedTestSourcesDir, configProperties.testFramework.classExtension,
+                        singleTestGenerator()))
+    }
 
-	private static SingleTestGenerator singleTestGenerator() {
-		List<SingleTestGenerator> factories = SpringFactoriesLoader.
-				loadFactories(SingleTestGenerator, null)
-		if (factories.empty) {
-			return new JavaTestGenerator()
-		}
-		return factories.first()
-	}
+    private static SingleTestGenerator singleTestGenerator() {
+        List<SingleTestGenerator> factories = SpringFactoriesLoader.
+                loadFactories(SingleTestGenerator, null)
+        if (factories.empty) {
+            return new JavaTestGenerator()
+        }
+        return factories.first()
+    }
 
-	TestGenerator(ContractVerifierConfigProperties configProperties, SingleTestGenerator generator, FileSaver saver) {
-		this.configProperties = configProperties
-		if (configProperties.contractsDslDir == null) {
-			throw new ContractVerifierException("Stubs directory not found under " + configProperties.contractsDslDir)
-		}
-		this.generator = generator
-		this.saver = saver
-		contractFileScanner = new ContractFileScannerBuilder()
-				.baseDir(configProperties.contractsDslDir)
-				.excluded(configProperties.excludedFiles as Set)
-				.ignored(configProperties.ignoredFiles as Set)
-				.included(configProperties.includedFiles as Set)
-				.includeMatcher(this.configProperties.includedContracts)
-				.build()
-	}
+    TestGenerator(ContractVerifierConfigProperties configProperties, SingleTestGenerator generator, FileSaver saver) {
+        this.configProperties = configProperties
+        if (configProperties.contractsDslDir == null) {
+            throw new ContractVerifierException("Stubs directory not found under " + configProperties.contractsDslDir)
+        }
+        this.generator = generator
+        this.saver = saver
+        contractFileScanner = new ContractFileScannerBuilder()
+                .baseDir(configProperties.contractsDslDir)
+                .excluded(configProperties.excludedFiles as Set)
+                .ignored(configProperties.ignoredFiles as Set)
+                .included(configProperties.includedFiles as Set)
+                .includeMatcher(this.configProperties.includedContracts)
+                .build()
+    }
 
-	protected TestGenerator(ContractVerifierConfigProperties configProperties, SingleTestGenerator generator, FileSaver saver, ContractFileScanner contractFileScanner) {
-		this.configProperties = configProperties
-		if (configProperties.contractsDslDir == null) {
-			throw new ContractVerifierException("Stubs directory not found under " + configProperties.contractsDslDir)
-		}
-		this.generator = generator
-		this.saver = saver
-		this.contractFileScanner = contractFileScanner
-	}
+    protected TestGenerator(ContractVerifierConfigProperties configProperties, SingleTestGenerator generator, FileSaver saver, ContractFileScanner contractFileScanner) {
+        this.configProperties = configProperties
+        if (configProperties.contractsDslDir == null) {
+            throw new ContractVerifierException("Stubs directory not found under " + configProperties.contractsDslDir)
+        }
+        this.generator = generator
+        this.saver = saver
+        this.contractFileScanner = contractFileScanner
+    }
 
-	int generate() {
-		generateTestClasses(basePackageName())
-		NamesUtil.recrusiveDirectoryToPackage(configProperties.generatedTestSourcesDir)
-		NamesUtil.recrusiveDirectoryToPackage(configProperties.generatedTestResourcesDir)
-		return counter.get()
-	}
 
-	private String basePackageName() {
-		if (configProperties.basePackageForTests) {
-			return configProperties.basePackageForTests
-		}
-		else if (configProperties.baseClassForTests) {
-			return toLastDot(configProperties.baseClassForTests)
-		}
-		else if (configProperties.packageWithBaseClasses) {
-			return configProperties.packageWithBaseClasses
-		}
-		return DEFAULT_TEST_PACKAGE
-	}
+    /**
+     * 生成测试文件
+     * @return
+     */
+    int generate() {
+        generateTestClasses(basePackageName())
+        NamesUtil.recrusiveDirectoryToPackage(configProperties.generatedTestSourcesDir)
+        NamesUtil.recrusiveDirectoryToPackage(configProperties.generatedTestResourcesDir)
+        return counter.get()
+    }
 
-	@PackageScope
-	void generateTestClasses(final String basePackageName) {
-		MultiValueMap<Path, ContractMetadata> contracts = contractFileScanner.
-				findContractsRecursively()
-		if (log.isDebugEnabled()) {
-			log.debug("Found the following contracts " + contracts.keySet())
-		}
-		Set<Map.Entry<Path,List<ContractMetadata>>> inProgress = inProgress(contracts)
-		if (!inProgress.isEmpty() && configProperties.failOnInProgress) {
-			throw new IllegalStateException("In progress contracts found in paths [" + inProgress.collect { it.key.toString() }.join(",") + "] and the switch [failOnInProgress] is set to [true]. Either unmark those contracts as in progress, or set the switch to [false].")
-		}
-		processAllNotInProgress(contracts,basePackageName)
-	}
+    private String basePackageName() {
+        if (configProperties.basePackageForTests) {
+            return configProperties.basePackageForTests
+        } else if (configProperties.baseClassForTests) {
+            return toLastDot(configProperties.baseClassForTests)
+        } else if (configProperties.packageWithBaseClasses) {
+            return configProperties.packageWithBaseClasses
+        }
+        return DEFAULT_TEST_PACKAGE
+    }
 
-	@CompileDynamic
-	private Set<Map.Entry<Path,List<ContractMetadata>>> inProgress(MultiValueMap<Path,ContractMetadata> contracts) {
-		return contracts.entrySet()
-					 .findAll { Map.Entry<Path, List<ContractMetadata>> entry -> entry.getValue().any { it.anyInProgress() }}
-	}
+    @PackageScope
+    void generateTestClasses(final String basePackageName) {
+        MultiValueMap<Path, ContractMetadata> contracts = contractFileScanner.
+                findContractsRecursively()
+        if (log.isDebugEnabled()) {
+            log.debug("Found the following contracts " + contracts.keySet())
+        }
+        Set<Map.Entry<Path, List<ContractMetadata>>> inProgress = inProgress(contracts)
+        if (!inProgress.isEmpty() && configProperties.failOnInProgress) {
+            throw new IllegalStateException("In progress contracts found in paths [" + inProgress.collect {
+                it.key.toString()
+            }.join(",") + "] and the switch [failOnInProgress] is set to [true]. Either unmark those contracts as in progress, or set the switch to [false].")
+        }
+        processAllNotInProgress(contracts, basePackageName)
+    }
 
-	@PackageScope
-	@CompileDynamic
-	Set<Map.Entry<Path,List<ContractMetadata>>> processAllNotInProgress(MultiValueMap<Path,ContractMetadata> contracts, String basePackageName) {
-		contracts.entrySet()
-		.findAll { Map.Entry<Path, List<ContractMetadata>> entry -> !entry.value.any { it.anyInProgress() }}
-		.each {
-			Map.Entry<Path, List<ContractMetadata>> entry ->
-				processIncludedDirectory(
-						relativizeContractPath(entry), (Collection<ContractMetadata>) entry.
-						getValue(), basePackageName)
-		}
-	}
+    @CompileDynamic
+    private Set<Map.Entry<Path, List<ContractMetadata>>> inProgress(MultiValueMap<Path, ContractMetadata> contracts) {
+        return contracts.entrySet()
+                .findAll { Map.Entry<Path, List<ContractMetadata>> entry ->
+            entry.getValue().any {
+                it.anyInProgress()
+            }
+        }
+    }
 
-	private String relativizeContractPath(Map.Entry<Path, List<ContractMetadata>> entry) {
-		Path relativePath = configProperties.contractsDslDir.toPath().
-				relativize(entry.getKey())
-		if (StringUtils.isEmpty(relativePath.toString())) {
-			return DEFAULT_CLASS_PREFIX
-		}
-		return relativePath.toString()
-	}
+    @PackageScope
+    @CompileDynamic
+    Set<Map.Entry<Path, List<ContractMetadata>>> processAllNotInProgress(MultiValueMap<Path, ContractMetadata> contracts,
+                                                                         String basePackageName) {
+        contracts.entrySet()
+                .findAll { Map.Entry<Path, List<ContractMetadata>> entry -> !entry.value.any { it.anyInProgress() } }
+                .each {
+            Map.Entry<Path, List<ContractMetadata>> entry ->
+                processIncludedDirectory(
+                        relativizeContractPath(entry), (Collection<ContractMetadata>) entry.
+                        getValue(), basePackageName)
+        }
+    }
 
-	private void processIncludedDirectory(
-			final String includedDirectoryRelativePath, Collection<ContractMetadata> contracts, final String basePackageNameForClass) {
-		if (log.isDebugEnabled()) {
-			log.debug("Collected contracts with metadata ${contracts} relative path is [${includedDirectoryRelativePath}]")
-		}
-		if (contracts.size()) {
-			def className = afterLast(includedDirectoryRelativePath.toString(), File.separator) + resolveNameSuffix()
-			def convertedClassName = convertIllegalPackageChars(className)
-			def packageName =
-					buildPackage(basePackageNameForClass, includedDirectoryRelativePath)
-			Path dir = saver.generateTestBaseDir(basePackageNameForClass,
-					convertIllegalPackageChars(includedDirectoryRelativePath.toString()))
-			Path classPath = saver.pathToClass(dir, convertedClassName)
-			def classBytes = generator.
-					buildClass(configProperties, contracts, includedDirectoryRelativePath,
-							new SingleTestGenerator.GeneratedClassData(convertedClassName, packageName, classPath)).
-					getBytes(StandardCharsets.UTF_8)
-			saver.saveClassFile(classPath, classBytes)
-			counter.incrementAndGet()
-		}
-	}
+    private String relativizeContractPath(Map.Entry<Path, List<ContractMetadata>> entry) {
+        Path relativePath = configProperties.contractsDslDir.toPath().
+                relativize(entry.getKey())
+        if (StringUtils.isEmpty(relativePath.toString())) {
+            return DEFAULT_CLASS_PREFIX
+        }
+        return relativePath.toString()
+    }
 
-	private String resolveNameSuffix() {
-		return configProperties.nameSuffixForTests ?: configProperties.testFramework.classNameSuffix
-	}
+    private void processIncludedDirectory(
+            final String includedDirectoryRelativePath, Collection<ContractMetadata> contracts, final String basePackageNameForClass) {
+        if (log.isDebugEnabled()) {
+            log.debug("Collected contracts with metadata ${contracts} relative path is [${includedDirectoryRelativePath}]")
+        }
+        if (contracts.size()) {
+            def className = afterLast(includedDirectoryRelativePath.toString(), File.separator) + resolveNameSuffix()
+            def convertedClassName = convertIllegalPackageChars(className)
+            def packageName =
+                    buildPackage(basePackageNameForClass, includedDirectoryRelativePath)
+            Path dir = saver.generateTestBaseDir(basePackageNameForClass,
+                    convertIllegalPackageChars(includedDirectoryRelativePath.toString()))
+            Path classPath = saver.pathToClass(dir, convertedClassName)
+            def classBytes = generator.
+                    buildClass(configProperties, contracts, includedDirectoryRelativePath,
+                            new SingleTestGenerator.GeneratedClassData(convertedClassName, packageName, classPath)).
+                    getBytes(StandardCharsets.UTF_8)
+            saver.saveClassFile(classPath, classBytes)
+            counter.incrementAndGet()
+        }
+    }
 
-	protected static String buildPackage(final String packageNameForClass, final String includedDirectoryRelativePath) {
-		String directory = beforeLast(includedDirectoryRelativePath, File.separator)
-		String convertedPackage = "$packageNameForClass.${directoryToPackage(convertIllegalPackageChars(directory))}"
-		return !directory.empty ? convertedPackage : packageNameForClass
-	}
+    private String resolveNameSuffix() {
+        return configProperties.nameSuffixForTests ?: configProperties.testFramework.classNameSuffix
+    }
+
+    protected static String buildPackage(final String packageNameForClass, final String includedDirectoryRelativePath) {
+        String directory = beforeLast(includedDirectoryRelativePath, File.separator)
+        String convertedPackage = "$packageNameForClass.${directoryToPackage(convertIllegalPackageChars(directory))}"
+        return !directory.empty ? convertedPackage : packageNameForClass
+    }
 
 }

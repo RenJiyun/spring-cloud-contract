@@ -20,31 +20,34 @@ import java.util.Arrays;
 
 import org.springframework.cloud.contract.verifier.config.TestFramework;
 
+/**
+ * 用于导入junit4的依赖包
+ */
 class JUnit4Imports implements Imports {
 
-	private final BlockBuilder blockBuilder;
+    private final BlockBuilder blockBuilder;
 
-	private final GeneratedClassMetaData generatedClassMetaData;
+    private final GeneratedClassMetaData generatedClassMetaData;
 
-	private static final String[] IMPORTS = { "org.junit.Test", "org.junit.Rule" };
+    private static final String[] IMPORTS = {"org.junit.Test", "org.junit.Rule"};
 
-	JUnit4Imports(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		this.blockBuilder = blockBuilder;
-		this.generatedClassMetaData = generatedClassMetaData;
-	}
+    JUnit4Imports(BlockBuilder blockBuilder,
+                  GeneratedClassMetaData generatedClassMetaData) {
+        this.blockBuilder = blockBuilder;
+        this.generatedClassMetaData = generatedClassMetaData;
+    }
 
-	@Override
-	public Imports call() {
-		Arrays.stream(IMPORTS)
-				.forEach(s -> this.blockBuilder.addLineWithEnding("import " + s));
-		return this;
-	}
+    @Override
+    public Imports call() {
+        Arrays.stream(IMPORTS)
+                .forEach(s -> this.blockBuilder.addLineWithEnding("import " + s));
+        return this;
+    }
 
-	@Override
-	public boolean accept() {
-		return this.generatedClassMetaData.configProperties
-				.getTestFramework() == TestFramework.JUNIT;
-	}
+    @Override
+    public boolean accept() {
+        return this.generatedClassMetaData.configProperties
+                .getTestFramework() == TestFramework.JUNIT;
+    }
 
 }

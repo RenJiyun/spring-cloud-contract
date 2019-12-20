@@ -16,37 +16,37 @@
 
 package org.springframework.cloud.contract.verifier.builder;
 
-import java.util.Arrays;
-
 import org.springframework.cloud.contract.verifier.config.TestFramework;
+
+import java.util.Arrays;
 
 class JUnit5OrderClassAnnotation implements ClassAnnotation {
 
-	private final BlockBuilder blockBuilder;
+    private final BlockBuilder blockBuilder;
 
-	private final GeneratedClassMetaData generatedClassMetaData;
+    private final GeneratedClassMetaData generatedClassMetaData;
 
-	private static final String[] ANNOTATIONS = {
-			"@TestMethodOrder(MethodOrderer.Alphanumeric.class)" };
+    private static final String[] ANNOTATIONS = {
+            "@TestMethodOrder(MethodOrderer.Alphanumeric.class)"};
 
-	JUnit5OrderClassAnnotation(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		this.blockBuilder = blockBuilder;
-		this.generatedClassMetaData = generatedClassMetaData;
-	}
+    JUnit5OrderClassAnnotation(BlockBuilder blockBuilder,
+                               GeneratedClassMetaData generatedClassMetaData) {
+        this.blockBuilder = blockBuilder;
+        this.generatedClassMetaData = generatedClassMetaData;
+    }
 
-	@Override
-	public ClassAnnotation call() {
-		Arrays.stream(ANNOTATIONS).forEach(this.blockBuilder::addIndented);
-		return this;
-	}
+    @Override
+    public ClassAnnotation call() {
+        Arrays.stream(ANNOTATIONS).forEach(this.blockBuilder::addIndented);
+        return this;
+    }
 
-	@Override
-	public boolean accept() {
-		return this.generatedClassMetaData.configProperties
-				.getTestFramework() == TestFramework.JUNIT5
-				&& this.generatedClassMetaData.listOfFiles.stream()
-						.anyMatch(meta -> meta.getOrder() != null);
-	}
+    @Override
+    public boolean accept() {
+        return this.generatedClassMetaData.configProperties
+                .getTestFramework() == TestFramework.JUNIT5
+                && this.generatedClassMetaData.listOfFiles.stream()
+                .anyMatch(meta -> meta.getOrder() != null);
+    }
 
 }

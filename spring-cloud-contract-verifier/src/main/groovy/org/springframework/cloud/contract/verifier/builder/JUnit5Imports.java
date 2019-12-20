@@ -20,32 +20,35 @@ import java.util.Arrays;
 
 import org.springframework.cloud.contract.verifier.config.TestFramework;
 
+/**
+ * 用于导入junit5的依赖包
+ */
 class JUnit5Imports implements Imports {
 
-	private final BlockBuilder blockBuilder;
+    private final BlockBuilder blockBuilder;
 
-	private final GeneratedClassMetaData generatedClassMetaData;
+    private final GeneratedClassMetaData generatedClassMetaData;
 
-	private static final String[] IMPORTS = { "org.junit.jupiter.api.Test",
-			"org.junit.jupiter.api.extension.ExtendWith" };
+    private static final String[] IMPORTS = {"org.junit.jupiter.api.Test",
+            "org.junit.jupiter.api.extension.ExtendWith"};
 
-	JUnit5Imports(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		this.blockBuilder = blockBuilder;
-		this.generatedClassMetaData = generatedClassMetaData;
-	}
+    JUnit5Imports(BlockBuilder blockBuilder,
+                  GeneratedClassMetaData generatedClassMetaData) {
+        this.blockBuilder = blockBuilder;
+        this.generatedClassMetaData = generatedClassMetaData;
+    }
 
-	@Override
-	public Imports call() {
-		Arrays.stream(IMPORTS)
-				.forEach(s -> this.blockBuilder.addLineWithEnding("import " + s));
-		return this;
-	}
+    @Override
+    public Imports call() {
+        Arrays.stream(IMPORTS)
+                .forEach(s -> this.blockBuilder.addLineWithEnding("import " + s));
+        return this;
+    }
 
-	@Override
-	public boolean accept() {
-		return this.generatedClassMetaData.configProperties
-				.getTestFramework() == TestFramework.JUNIT5;
-	}
+    @Override
+    public boolean accept() {
+        return this.generatedClassMetaData.configProperties
+                .getTestFramework() == TestFramework.JUNIT5;
+    }
 
 }

@@ -16,37 +16,37 @@
 
 package org.springframework.cloud.contract.verifier.builder;
 
-import java.util.Arrays;
-
 import org.springframework.cloud.contract.verifier.config.TestFramework;
+
+import java.util.Arrays;
 
 class JUnit4OrderClassAnnotation implements ClassAnnotation {
 
-	private final BlockBuilder blockBuilder;
+    private final BlockBuilder blockBuilder;
 
-	private final GeneratedClassMetaData generatedClassMetaData;
+    private final GeneratedClassMetaData generatedClassMetaData;
 
-	private static final String[] ANNOTATIONS = {
-			"@FixMethodOrder(MethodSorters.NAME_ASCENDING)" };
+    private static final String[] ANNOTATIONS = {
+            "@FixMethodOrder(MethodSorters.NAME_ASCENDING)"};
 
-	JUnit4OrderClassAnnotation(BlockBuilder blockBuilder,
-			GeneratedClassMetaData generatedClassMetaData) {
-		this.blockBuilder = blockBuilder;
-		this.generatedClassMetaData = generatedClassMetaData;
-	}
+    JUnit4OrderClassAnnotation(BlockBuilder blockBuilder,
+                               GeneratedClassMetaData generatedClassMetaData) {
+        this.blockBuilder = blockBuilder;
+        this.generatedClassMetaData = generatedClassMetaData;
+    }
 
-	@Override
-	public ClassAnnotation call() {
-		Arrays.stream(ANNOTATIONS).forEach(this.blockBuilder::addLine);
-		return this;
-	}
+    @Override
+    public ClassAnnotation call() {
+        Arrays.stream(ANNOTATIONS).forEach(this.blockBuilder::addLine);
+        return this;
+    }
 
-	@Override
-	public boolean accept() {
-		return this.generatedClassMetaData.configProperties
-				.getTestFramework() == TestFramework.JUNIT
-				&& this.generatedClassMetaData.listOfFiles.stream()
-						.anyMatch(meta -> meta.getOrder() != null);
-	}
+    @Override
+    public boolean accept() {
+        return this.generatedClassMetaData.configProperties
+                .getTestFramework() == TestFramework.JUNIT
+                && this.generatedClassMetaData.listOfFiles.stream()
+                .anyMatch(meta -> meta.getOrder() != null);
+    }
 
 }
