@@ -71,8 +71,8 @@
 
 	<modules>
 		<module>spring-cloud-contract-dependencies</module>
-		<module>docs</module>
-		<module>docker</module>
+		<!--<module>docs</module>
+		<module>docker</module>-->
 		<module>spring-cloud-contract-shade</module>
 		<module>spring-cloud-contract-wiremock</module>
 		<module>spring-cloud-contract-verifier</module>
@@ -626,21 +626,21 @@
 				<groupId>io.spring.javaformat</groupId>
 				<artifactId>spring-javaformat-maven-plugin</artifactId>
 			</plugin>
-			<plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
+			</plugin>-->
 		</plugins>
 	</build>
 
-	<reporting>
+	<!--<reporting>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 			</plugin>
 		</plugins>
-	</reporting>
+	</reporting>-->
 
 	<profiles>
 		<profile>
